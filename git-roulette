@@ -1,0 +1,66 @@
+#!/bin/zsh
+
+function git-roulette {
+
+  git commit -m $*
+  sha1=`git show --format=oneline | head -n1 | cut -d ' ' -f 1`
+
+  last_letter_of_the_sha1=${sha1:39} # The sha1 is 40 characters long
+
+  case $last_letter_of_the_sha1 in
+    'a' )
+      rename-master;;
+    'b' )
+      change-commit-message;;
+    'c' )
+      rename-origin;;
+    'd' )
+      add-commit;;
+    'e' )
+      rename-branch;;
+    'f' )
+      add-revert $sha1;;
+  esac
+}
+
+function rename-master {
+  git branch -M master the-one-branch
+  kapow "The master branch has been renamed to 'the-one-branch'!"
+}
+
+function change-commit-message {
+  reversed-commit-message=`echo $* | rev`
+  git commit --amend -m $reversed-commit-message
+  kapow "Your commit message has been changed to something silly"
+}
+
+function rename-origin {
+  git remote rename origin the-distant-place
+  kapow "The origin remote has been renamed to 'the-distant-place'"
+}
+
+function add-commit {
+  echo "kapow!" > kapow.txt
+  git add kapow.txt
+  git commit -m "I use git-roulette. It's great."
+  kapow "An extra commit adding a silly file has been added"
+}
+
+function rename-branch {
+  git branch --set-upstream-to=treetop
+  kapow "The local branch has been set to track a remote branch called 'treetop'"
+}
+
+function add-revert {
+  git revert $1
+  kapow "A commit reverting your previous commit has been added"
+}
+
+function kapow {
+  echo 'kapow!!!'
+  echo $*
+  exit 1
+}
+
+
+git-roulette $*
